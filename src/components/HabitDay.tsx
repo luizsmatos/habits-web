@@ -1,28 +1,40 @@
 import * as Popover from '@radix-ui/react-popover';
 import clsx from 'clsx';
 import dayjs from 'dayjs';
+import { useState } from 'react';
 
 import { Checkbox } from './Checkbox';
+import { HabitsList } from './HabitsList';
 import { ProgressBar } from './ProgressBar';
 
 interface HabitDayProps {
   date: Date;
-  completed?: number;
+  defaultCompleted?: number;
   amount?: number;
 }
 
-export function HabitDay({ date, completed = 0, amount = 0 }: HabitDayProps) {
+export function HabitDay({
+  date,
+  defaultCompleted = 0,
+  amount = 0,
+}: HabitDayProps) {
+  const [completed, setCompleted] = useState(defaultCompleted);
+
   const completedPercentage =
     amount > 0 ? Math.round((completed / amount) * 100) : 0;
 
   const dayOfWeek = dayjs(date).format('dddd');
   const dayAndMonth = dayjs(date).format('DD/MM');
 
+  function handleCompletedChanged(completed: number) {
+    setCompleted(completed);
+  }
+
   return (
     <Popover.Root>
       <Popover.Trigger
         className={clsx(
-          'w-10 h-10 bg-zinc-900 border-2 border-zinc-800 rounded-lg',
+          'w-10 h-10 bg-zinc-900 border-2 border-zinc-800 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-violet-700 focus:ring-off-set-2 focus:ring-offset-background',
           {
             'bg-zinc-900 border-zinc-800': completedPercentage === 0,
             'bg-violet-900 border-violet-500':
@@ -46,13 +58,9 @@ export function HabitDay({ date, completed = 0, amount = 0 }: HabitDayProps) {
           </span>
 
           <ProgressBar progress={completedPercentage} />
-          <div className='mt-6 flex flex-col gap-3'>
-            <Checkbox>
-              <span className='font-semibold text-xl text-white leading-tight group-data-[state=checked]:line-through group-data-[state=checked]:text-zinc-400'>
-                Beber 2L de água
-              </span>
-            </Checkbox>
-          </div>
+
+          <HabitsList date={date} onCompletedChange={handleCompletedChanged} />
+
           <Popover.Arrow height={8} width={16} className='fill-zinc-900' />
         </Popover.Content>
       </Popover.Portal>
